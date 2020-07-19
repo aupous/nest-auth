@@ -11,9 +11,20 @@ export class UserService {
     @InjectModel(User.name) private readonly userModel: Model<User>,
   ) {}
 
+  async findOne(where: Partial<User>): Promise<User | undefined> {
+    return this.userModel.findOne(where).lean();
+  }
+
   async create(data: CreateUserDTO): Promise<User> {
     const createdUser = new this.userModel(await this.normalizeUser(data));
     return createdUser.save();
+  }
+
+  async findWithPassword(email: string): Promise<User | undefined> {
+    return this.userModel
+      .findOne({ email })
+      .select('+password')
+      .lean();
   }
 
   private async normalizeUser(data: CreateUserDTO) {
